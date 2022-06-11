@@ -22,23 +22,24 @@ class Chunk {
 }
 
 class CircleObstacle {
-    constructor(x, y, radius) {
+    constructor(x, y, radius, color="#ffffff") {
         const self = this;
         self.x = x;
         self.y = y;
         self.radius = radius;
+        self.color = color;
     }
 
     draw(camera) {
         const self = this;
-        let dx = camera.x - self.x;
-        let dy = camera.y - self.y;
+        let dx = self.x - camera.x;
+        let dy = self.y - camera.y;
         let cx = camera.canvas.width / 2;
-        let cy = camera.canvas.width / 2;
+        let cy = camera.canvas.height / 2;
         dx = dx * camera.scale;
         dy = dy * camera.scale;
         camera.ctx.beginPath();
-        camera.ctx.fillStyle = "#000000";
+        camera.ctx.fillStyle = self.color;
         camera.ctx.arc(cx + dx, cy + dy, self.radius * camera.scale, 0, 2 * Math.PI);
         camera.ctx.fill();
     }
@@ -98,6 +99,9 @@ class Camera {
         self.ctx = canvas.getContext("2d");
         self.x = 0;
         self.y = 0;
+        self.vx = 0;
+        self.vy = 0;
+        self.lastMoved = Date.now();
         self.fov = 64;
         self.game = game;
 
@@ -119,7 +123,23 @@ class Camera {
     render() {
         const self = this;
 
-        self.ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);
+        let now = Date.now();
+        let dt = ((now - self.lastMoved)/1000);
 
+
+        self.move(dt * self.vx, dt * self.vy);
+        self.lastMoved = now;
+
+        self.ctx.fillStyle = "#121212";
+        self.ctx.fillRect(0, 0, self.canvas.width, self.canvas.height);
+
+        let obstacles = self.game.lookup("CircleObstacle", self.x, self.y, self.fov);
+        for (let obstacle of obstacles) {
+            obstacle.draw(self);
+        }
+
+        requestAnimationFrame(() => {
+            self.render();
+        });
     }
 }
