@@ -3,7 +3,7 @@ class CircleObstacle {
         const self = this;
         self.x = x;
         self.y = y;
-        self.radius = radius;
+        self.r = radius;
         self.color = color;
     }
 
@@ -17,7 +17,7 @@ class CircleObstacle {
         dy = dy * camera.scale;
         camera.ctx.beginPath();
         camera.ctx.fillStyle = self.color;
-        camera.ctx.arc(cx + dx, cy + dy, self.radius * camera.scale, 0, 2 * Math.PI);
+        camera.ctx.arc(cx + dx, cy + dy, self.r * camera.scale, 0, 2 * Math.PI);
         camera.ctx.fill();
     }
 }

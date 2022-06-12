@@ -2,6 +2,8 @@ class Game {
     constructor() {
         const self = this;
         self.chunks = {};
+        self.width = 256;
+        self.height = 256;
     }
 
     register(entity) {
@@ -34,7 +36,7 @@ class Game {
                 let cx = x - x % 64;
                 let cy = y - y % 64;
                 let ci = `${cx},${cy}`;
-                if (self.chunks[ci]) {
+                if (self.chunks[ci] && self.chunks[ci].entities[className]) {
                     for (let entity of self.chunks[ci].entities[className]) {
                         output.add(entity);
                     }
