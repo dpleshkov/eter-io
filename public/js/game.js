@@ -85,3 +85,12 @@ document.addEventListener("keyup", (evt) => {
     }
 });
 
+document.addEventListener("click", (evt) => {
+    let cx = window.innerWidth / 2;
+    let cy = window.innerHeight / 2;
+
+    let angle = Math.atan2(evt.clientY - cy, evt.clientX - cx);
+
+    let projectile = new ProjectileEntity(player.x, player.y, 0.25, 15 * Math.cos(angle), 15 * Math.sin(angle), game);
+    game.register(projectile);
+});

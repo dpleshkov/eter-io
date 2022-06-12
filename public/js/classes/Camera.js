@@ -58,6 +58,11 @@ class Camera {
             player.draw(self);
         }
 
+        let projectiles = self.game.lookup("ProjectileEntity", self.x, self.y, self.fov);
+        for (let projectile of projectiles) {
+            projectile.draw(self);
+        }
+
         requestAnimationFrame(() => {
             self.render();
         });
