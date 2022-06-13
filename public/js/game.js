@@ -27,12 +27,12 @@ game.register(player);
 camera.tracking = player;
 camera.render();
 
-let movement = {
+/*let movement = {
     up: 0,
     down: 0,
     left: 0,
     right: 0
-}
+}*/
 
 
 /*canvas.addEventListener("mousemove", (evt) => {
@@ -45,7 +45,7 @@ let movement = {
     player.vy = 5*Math.sin(angle);
 });*/
 
-document.addEventListener("keydown", (evt) => {
+/*document.addEventListener("keydown", (evt) => {
     if (evt.code === "KeyW") {
         movement.up = 10;
     } else if (evt.code === "KeyS") {
@@ -57,15 +57,15 @@ document.addEventListener("keydown", (evt) => {
     }
     if (movement.right - movement.left || movement.down - movement.up) {
         let dir = Math.atan2(movement.down - movement.up, movement.right - movement.left);
-        player.vx = 10 * Math.cos(dir);
-        player.vy = 10 * Math.sin(dir);
+        player.vx = 15 * Math.cos(dir);
+        player.vy = 15 * Math.sin(dir);
     } else {
         player.vx = 0;
         player.vy = 0;
     }
-});
+});*/
 
-document.addEventListener("keyup", (evt) => {
+/*document.addEventListener("keyup", (evt) => {
     if (evt.code === "KeyW") {
         movement.up = 0;
     } else if (evt.code === "KeyS") {
@@ -77,13 +77,13 @@ document.addEventListener("keyup", (evt) => {
     }
     if (movement.right - movement.left || movement.down - movement.up) {
         let dir = Math.atan2(movement.down - movement.up, movement.right - movement.left);
-        player.vx = 10 * Math.cos(dir);
-        player.vy = 10 * Math.sin(dir);
+        player.vx = 15 * Math.cos(dir);
+        player.vy = 15 * Math.sin(dir);
     } else {
         player.vx = 0;
         player.vy = 0;
     }
-});
+});*/
 
 document.addEventListener("click", (evt) => {
     let cx = window.innerWidth / 2;
@@ -91,6 +91,10 @@ document.addEventListener("click", (evt) => {
 
     let angle = Math.atan2(evt.clientY - cy, evt.clientX - cx);
 
-    let projectile = new ProjectileEntity(player.x, player.y, 0.25, 15 * Math.cos(angle), 15 * Math.sin(angle), game);
-    game.register(projectile);
+    player.fire(angle, 15, 0.25);
+});
+
+window.addEventListener("resize", (evt) => {
+    camera.resize();
+    //console.log(camera.scale);
 });

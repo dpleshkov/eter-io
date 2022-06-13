@@ -14,6 +14,11 @@ class ProjectileEntity {
         self.lastMoved = Date.now();
     }
 
+    get mass() {
+        const self = this;
+        return Math.PI * self.r * self.r;
+    }
+
     tick() {
         const self = this;
 
@@ -23,7 +28,11 @@ class ProjectileEntity {
         let nextPosition = new Vector(self.x + dt * self.vx, self.y + dt * self.vy);
         let nextVelocity = new Vector(self.vx, self.vy);
 
-        let possibleCollisions = self.game.lookup("CircleObstacle", self.x, self.y, 32);
+        let possibleCollisions = new Set([
+            ...self.game.lookup("CircleObstacle", self.x, self.y, 32),
+            //...self.game.lookup("PlayerEntity", self.x, self.y, 32)
+        ]);
+
         for (let obstacle of possibleCollisions) {
             if (Util.distance(nextPosition, obstacle) <= self.r + obstacle.r) {
                 // So our circles are colliding.

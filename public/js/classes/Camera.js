@@ -14,6 +14,21 @@ class Camera {
         self.scale = self.canvas.width < self.canvas.height ? self.canvas.height / self.fov : self.canvas.width / self.fov;
 
         self.tracking = self;
+
+        self.resize();
+    }
+
+    resize() {
+        const self = this;
+
+        self.canvas.setAttribute("width", String(window.innerWidth*2));
+        self.canvas.setAttribute("height", String(window.innerHeight*2));
+        self.canvas.style.width = (window.innerWidth) + "px";
+        self.canvas.style.height = (window.innerHeight) + "px";
+        self.fov = 64;
+
+        self.scale = self.canvas.width < self.canvas.height ? self.canvas.height / self.fov : self.canvas.width / self.fov;
+        console.log(self.scale);
     }
 
     move(x, y) {
