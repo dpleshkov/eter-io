@@ -10,6 +10,10 @@ class ProjectileEntity extends Entity {
 
         self.speed = velocity.length();
         self.lastMoved = Date.now();
+
+        self.bounces = 0;
+        self.maxBounces = options.maxBounces || 1;
+        self.destroyOnNextTick = false;
     }
 
     get mass() {
@@ -20,6 +24,9 @@ class ProjectileEntity extends Entity {
     resolveCollision(obstacle, nextPosition, nextVelocity, currentSpeed) {
         const self = this;
 
+        let position = nextPosition.clone();
+        let velocity = nextVelocity.clone();
+
         if (obstacle.constructor.name === "CircleObstacle") {
             // So our circles are colliding.
             // Let's find snap point and tangent velocity
@@ -29,33 +36,40 @@ class ProjectileEntity extends Entity {
 
             // Adjust nextPosition
 
-            nextPosition.x -= adjustDistance * Math.cos(adjustAngle);
-            nextPosition.y -= adjustDistance * Math.sin(adjustAngle);
+            position.x -= adjustDistance * Math.cos(adjustAngle);
+            position.y -= adjustDistance * Math.sin(adjustAngle);
 
             // Adjust nextVelocity
             let normal = adjustAngle;
-            let incoming = nextVelocity.direction;
+            let incoming = nextVelocity.angle();
             let outgoing = 2 * normal - Math.PI - incoming;
 
             // let deltaV = 2 * nextVelocity.magnitude * Math.sin((adjustAngle + Math.PI / 2));
 
-            //nextVelocity.x = currentSpeed * Math.cos(outgoing) * 0.8;
-            //nextVelocity.y = currentSpeed * Math.sin(outgoing) * 0.8;
+            velocity.x = currentSpeed * Math.cos(outgoing) * 1;
+            velocity.y = currentSpeed * Math.sin(outgoing) * 1;
+
         }
         return {
-            position: nextPosition,
-            velocity: nextVelocity
+            position: position,
+            velocity: velocity
         }
     }
 
     tick() {
         const self = this;
 
+        if (self.destroyOnNextTick) {
+            self.destroy();
+            return;
+        }
+
         let now = Date.now();
         let dt = ((now - self.lastMoved)/1000);
 
         let nextPosition = self.position.clone().add(new Vector(dt * self.velocity.x, dt * self.velocity.y));
         let nextVelocity = self.velocity.clone();
+        let currentSpeed = nextVelocity.length();
 
         let possibleCollisions = new Set([
             ...self.game.lookup("CircleObstacle", self.position, 32),
@@ -63,34 +77,18 @@ class ProjectileEntity extends Entity {
         ]);
 
         for (let obstacle of possibleCollisions) {
-            if (obstacle.position.distanceTo(self.position) <= self.radius + obstacle.radius) {
-                console.log("collission ")
+            if (obstacle.position.distanceTo(nextPosition) <= self.radius + obstacle.radius) {
 
                 let collision = self.resolveCollision(obstacle, nextPosition, nextVelocity, self.speed);
                 nextPosition = collision.position;
                 nextVelocity = collision.velocity;
 
-                /*// So our circles are colliding.
-                // Let's find snap point and tangent velocity
-
-                let adjustAngle = Math.atan2(obstacle.position.y - nextPosition.y, obstacle.position.x - nextPosition.x); // POSSIBLE ERROR
-                let adjustDistance = (obstacle.radius + self.radius) - (nextPosition.distanceTo(obstacle.position));
-
-                // Adjust nextPosition
-
-                nextPosition.x -= adjustDistance * Math.cos(adjustAngle);
-                nextPosition.y -= adjustDistance * Math.sin(adjustAngle);
-
-                // Adjust nextVelocity
-
-                /*let normal = adjustAngle;
-                let incoming = nextVelocity.angle();
-                let outgoing = 2 * normal - Math.PI - incoming;
-
-                // let deltaV = 2 * nextVelocity.magnitude * Math.sin((adjustAngle + Math.PI / 2));
-
-                nextVelocity.x = self.speed * Math.cos(outgoing);
-                nextVelocity.y = self.speed * Math.sin(outgoing);*/
+                if (obstacle.constructor.name === "CircleObstacle") {
+                    self.bounces += 1;
+                    if (self.bounces > self.maxBounces) {
+                        self.destroyOnNextTick = true;
+                    }
+                }
             }
         }
 

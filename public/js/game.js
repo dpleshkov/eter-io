@@ -98,7 +98,7 @@ document.addEventListener("click", (evt) => {
 
     let angle = Math.atan2(evt.clientY - cy, evt.clientX - cx);
 
-    player.fire(angle, 15, 1);
+    player.fire(angle, 30, 0.25);
 });
 
 window.addEventListener("resize", (evt) => {
