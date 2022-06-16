@@ -1,25 +1,51 @@
-class PlayerEntity {
-    constructor(x, y, r, game, name, color="#d26060") {
+class PlayerEntity extends Entity {
+    constructor(position = new Vector2(), velocity = new Vector2(), game = new Game(), options = {}) {
+        super(position, velocity, game);
         const self = this;
 
-        self.x = x;
-        self.y = y;
-        self.r = r;
+        self.radius = options.radius || 1;
+        self.color = options.color || "#e86a6a";
+        self.name = options.name || "Player";
 
-        self.vx = 0;
-        self.vy = 0;
-
-        self.color = color;
-        self.name = name;
-        self.game = game;
-
-        self.ci = `${self.x - self.x % 64},${self.y - self.y % 64}`;
+        self.acceleration = options.acceleration || new Vector2();
+        self.apparentVelocity = new Vector2();
         self.lastMoved = Date.now();
+    }
+
+    _register() {
+        if (window.DEBUG) console.log("PlayerEntity::_register called");
+        super._register();
     }
 
     get mass() {
         const self = this;
-        return Math.PI * self.r * self.r;
+        return Math.PI * self.radius * self.radius;
+    }
+
+    resolveCollisions(obstacles = new Set(), nextPosition = new Vector2()) {
+        const self = this;
+
+        let tangents = [];
+        for (let obstacle of obstacles) {
+            let position = nextPosition.clone();
+            let adjustAngle = Math.atan2(obstacle.position.y - nextPosition.y, obstacle.position.x - nextPosition.x); // POSSIBLE ERROR
+            let adjustDistance = (obstacle.radius + self.radius) - (nextPosition.distanceTo(obstacle.position));
+            position.x -= adjustDistance * Math.cos(adjustAngle);
+            position.y -= adjustDistance * Math.sin(adjustAngle);
+            let tangent = position.clone();
+            tangent.x += self.radius * Math.cos(adjustAngle);
+            tangent.y += self.radius * Math.sin(adjustAngle);
+            tangents.push({
+                tangent: tangent,
+                position: position
+            });
+        }
+        if (tangents.length === 1) {
+            return tangents[0].position;
+        }
+        let circles = Util.circleGivenTangentPoints(tangents[0].tangent, tangents[1].tangent, self.radius);
+
+        return circles[0].distanceTo(nextPosition) < circles[1].distanceTo(nextPosition) ? circles[0] : circles[1];
     }
 
     resolveCollision(obstacle, nextPosition, nextVelocity, currentSpeed) {
@@ -29,8 +55,8 @@ class PlayerEntity {
             // So our circles are colliding.
             // Let's find snap point and tangent velocity
 
-            let adjustAngle = Math.atan2(obstacle.y - nextPosition.y, obstacle.x - nextPosition.x); // POSSIBLE ERROR
-            let adjustDistance = (obstacle.r + self.r) - (Util.distance(nextPosition, obstacle));
+            let adjustAngle = Math.atan2(obstacle.position.y - nextPosition.y, obstacle.position.x - nextPosition.x); // POSSIBLE ERROR
+            let adjustDistance = (obstacle.radius + self.radius) - (nextPosition.distanceTo(obstacle.position));
 
             // Adjust nextPosition
 
@@ -44,8 +70,8 @@ class PlayerEntity {
 
             // let deltaV = 2 * nextVelocity.magnitude * Math.sin((adjustAngle + Math.PI / 2));
 
-            nextVelocity.x = currentSpeed * Math.cos(outgoing);
-            nextVelocity.y = currentSpeed * Math.sin(outgoing);
+            //nextVelocity.x = currentSpeed * Math.cos(outgoing) * 0.8;
+            //nextVelocity.y = currentSpeed * Math.sin(outgoing) * 0.8;
         }
         return {
             position: nextPosition,
@@ -59,74 +85,78 @@ class PlayerEntity {
         let now = Date.now();
         let dt = ((now - self.lastMoved)/1000);
 
-        let nextPosition = new Vector(self.x + dt * self.vx, self.y + dt * self.vy);
-        let nextVelocity = new Vector(self.vx, self.vy);
-        let currentSpeed = nextVelocity.magnitude;
+        let nextPosition = self.position.clone().add(new Vector(dt * self.velocity.x, dt * self.velocity.y));
+        let nextVelocity = self.velocity.clone();
+        let currentSpeed = nextVelocity.length();
 
         let colliders = new Set([
-            ...self.game.lookup("CircleObstacle", self.x, self.y, 32),
-            ...self.game.lookup("ProjectileEntity", self.x, self.y, 32)
+            ...self.game.lookup("CircleObstacle", self.position, 32),
+            //...self.game.lookup("ProjectileEntity", self.position.x, self.position.y, 32)
         ]);
 
+        //let collisions = new Set();
         for (let obstacle of colliders) {
-            if (Util.distance(nextPosition, obstacle) <= self.r + obstacle.r) {
+            if (obstacle.position.distanceTo(nextPosition) <= self.radius + obstacle.radius) {
                 let collision = self.resolveCollision(obstacle, nextPosition, nextVelocity, currentSpeed);
                 nextPosition = collision.position;
                 nextVelocity = collision.velocity;
+                //collisions.add(obstacle);
             }
         }
 
-        if (nextPosition.x - self.r < 0) {
-            nextPosition.x = self.r;
-            nextVelocity.x = -nextVelocity.x;
+        //if (collisions.size > 0) nextPosition = self.resolveCollisions(collisions, nextPosition);
+
+        if (nextPosition.x - self.radius < 0) {
+            nextPosition.x = self.radius;
+            //nextVelocity.x = -nextVelocity.x;
         }
-        if (nextPosition.x + self.r > self.game.width) {
-            nextPosition.x = self.game.width - self.r;
-            nextVelocity.x = -nextVelocity.x;
+        if (nextPosition.x + self.radius > self.game.width) {
+            nextPosition.x = self.game.width - self.radius;
+            //nextVelocity.x = -nextVelocity.x;
         }
-        if (nextPosition.y - self.r < 0) {
-            nextPosition.y = self.r;
-            nextVelocity.y = -nextVelocity.y;
+        if (nextPosition.y - self.radius < 0) {
+            nextPosition.y = self.radius;
+            //nextVelocity.y = -nextVelocity.y;
         }
-        if (nextPosition.y + self.r > self.game.height) {
-            nextPosition.y = self.game.height - self.r;
-            nextVelocity.y = -nextVelocity.y;
+        if (nextPosition.y + self.radius > self.game.height) {
+            nextPosition.y = self.game.height - self.radius;
+            //nextVelocity.y = -nextVelocity.y;
         }
 
-        self.x = nextPosition.x;
-        self.y = nextPosition.y;
-        self.vx = nextVelocity.x;
-        self.vy = nextVelocity.y;
+        self.moveTo(nextPosition);
+        //self.x = nextPosition.x;
+        //self.y = nextPosition.y;
+        self.velocity = nextVelocity;
+        //self.vx = nextVelocity.x;
+        //self.vy = nextVelocity.y;
 
         // Update chunk residency if moved
 
-        let newCi = `${self.x - self.x % 64},${self.y - self.y % 64}`;
+        /*let newCi = `${self.x - self.x % 64},${self.y - self.y % 64}`;
         if (newCi !== self.ci) {
             self.game.chunks[self.ci].remove(self);
             self.game.chunks[newCi].add(self);
         }
-        self.ci = newCi;
+        self.ci = newCi;*/
 
         self.lastMoved = Date.now();
     }
 
-    fire(direction = 0, speed = 15, radius= 0.5) {
+    fire(direction = 0, speed = 10, radius= 0.5) {
         const self = this;
 
-        let dx = self.x + ((self.r + radius) * Math.cos(direction));
-        let dy = self.y + ((self.r + radius)) * Math.sin(direction);
+        let dx = self.position.x + ((self.radius + radius) * Math.cos(direction));
+        let dy = self.position.y + ((self.radius + radius) * Math.sin(direction));
         let vx = speed * Math.cos(direction);
         let vy = speed * Math.sin(direction);
 
-        let momentumMultiplier = 5;
+        let position = new Vector2(dx, dy);
+        let velocity = new Vector2(vx, vy);
 
-        let projectile = new ProjectileEntity(dx, dy, radius, self.vx + vx, self.vy + vy, self.game, self.color);
-        let momentum = speed * projectile.mass * momentumMultiplier;
-
-
-        self.vx -= momentum * Math.cos(direction) / self.mass;
-        self.vy -= momentum * Math.sin(direction) / self.mass;
-        self.game.register(projectile);
+        return new ProjectileEntity(position, velocity, self.game, {
+            color: self.color,
+            radius: radius
+        });
 
 
     }
@@ -134,22 +164,22 @@ class PlayerEntity {
     draw(camera) {
         const self = this;
 
-        let dx = self.x - camera.x;
-        let dy = self.y - camera.y;
+        let dx = self.position.x - camera.position.x;
+        let dy = self.position.y - camera.position.y;
         let cx = camera.canvas.width / 2;
         let cy = camera.canvas.height / 2;
         dx = dx * camera.scale;
         dy = dy * camera.scale;
         camera.ctx.beginPath();
         camera.ctx.fillStyle = self.color;
-        camera.ctx.arc(cx + dx, cy + dy, self.r * camera.scale, 0, 2 * Math.PI);
+        camera.ctx.arc(cx + dx, cy + dy, self.radius * camera.scale, 0, 2 * Math.PI);
         camera.ctx.fill();
 
         // Render name
+        camera.ctx.beginPath();
         camera.ctx.textAlign = "center";
         camera.ctx.font = `${0.5 * camera.scale}px Helvetica Neue`;
-        camera.ctx.fillText(self.name, cx + dx, cy + dy + (self.r * camera.scale) + camera.scale);
+        camera.ctx.fillText(self.name, cx + dx, cy + dy + (self.radius * camera.scale) + camera.scale);
 
-        self.tick();
     }
 }

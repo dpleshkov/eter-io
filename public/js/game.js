@@ -1,3 +1,5 @@
+window.DEBUG = true;
+
 let randint = function(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
@@ -6,10 +8,10 @@ let randint = function(min, max) {
 
 let canvas = document.getElementById("canvas");
 
-canvas.setAttribute("width", String(window.innerWidth*2));
+/*canvas.setAttribute("width", String(window.innerWidth*2));
 canvas.setAttribute("height", String(window.innerHeight*2));
 canvas.style.width = (window.innerWidth) + "px";
-canvas.style.height = (window.innerHeight) + "px";
+canvas.style.height = (window.innerHeight) + "px";*/
 
 let ctx = canvas.getContext("2d");
 ctx.fillStyle = "#121212";
@@ -18,21 +20,26 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
 let game = new Game();
 
 for (let x = 0; x < 512; x++) {
-    game.register(new CircleObstacle(randint(3, 253), randint(3, 253), randint(1, 3)));
+    new CircleObstacle(new Vector2(randint(3, 253), randint(3, 253)), game, {
+        radius: randint(1, 3),
+        color: "#ffffff"
+    })
 }
 
 let camera = new Camera(canvas, game);
-let player = new PlayerEntity(32, 32, 2, game, "Player");
-game.register(player);
+let player = new PlayerEntity(new Vector2(32, 32), new Vector2(), game, {
+    name: "Player"
+});
+
 camera.tracking = player;
 camera.render();
 
-/*let movement = {
+let movement = {
     up: 0,
     down: 0,
     left: 0,
     right: 0
-}*/
+}
 
 
 /*canvas.addEventListener("mousemove", (evt) => {
@@ -45,7 +52,7 @@ camera.render();
     player.vy = 5*Math.sin(angle);
 });*/
 
-/*document.addEventListener("keydown", (evt) => {
+document.addEventListener("keydown", (evt) => {
     if (evt.code === "KeyW") {
         movement.up = 10;
     } else if (evt.code === "KeyS") {
@@ -57,15 +64,15 @@ camera.render();
     }
     if (movement.right - movement.left || movement.down - movement.up) {
         let dir = Math.atan2(movement.down - movement.up, movement.right - movement.left);
-        player.vx = 15 * Math.cos(dir);
-        player.vy = 15 * Math.sin(dir);
+        player.velocity.x = 15 * Math.cos(dir);
+        player.velocity.y = 15 * Math.sin(dir);
     } else {
-        player.vx = 0;
-        player.vy = 0;
+        player.velocity.x = 0;
+        player.velocity.y = 0;
     }
-});*/
+});
 
-/*document.addEventListener("keyup", (evt) => {
+document.addEventListener("keyup", (evt) => {
     if (evt.code === "KeyW") {
         movement.up = 0;
     } else if (evt.code === "KeyS") {
@@ -77,13 +84,13 @@ camera.render();
     }
     if (movement.right - movement.left || movement.down - movement.up) {
         let dir = Math.atan2(movement.down - movement.up, movement.right - movement.left);
-        player.vx = 15 * Math.cos(dir);
-        player.vy = 15 * Math.sin(dir);
+        player.velocity.x = 15 * Math.cos(dir);
+        player.velocity.y = 15 * Math.sin(dir);
     } else {
-        player.vx = 0;
-        player.vy = 0;
+        player.velocity.x = 0;
+        player.velocity.y = 0;
     }
-});*/
+});
 
 document.addEventListener("click", (evt) => {
     let cx = window.innerWidth / 2;
@@ -91,7 +98,7 @@ document.addEventListener("click", (evt) => {
 
     let angle = Math.atan2(evt.clientY - cy, evt.clientX - cx);
 
-    player.fire(angle, 15, 0.25);
+    player.fire(angle, 15, 1);
 });
 
 window.addEventListener("resize", (evt) => {

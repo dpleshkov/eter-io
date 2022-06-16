@@ -8,3 +8,8 @@ html, body {
     left: 0;
     top: 0;
 }
+
+@font-face {
+    font-family: "Helvetica Neue";
+    src: url("../fonts/HelveticaNeue-Regular.otf");
+}

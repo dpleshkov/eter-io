@@ -1,16 +1,20 @@
 class Game {
-    constructor() {
+    constructor(width = 256, height = 256, chunkSize = 64) {
         const self = this;
+
         self.chunks = {};
-        self.width = 256;
-        self.height = 256;
+        self.width = width;
+        self.height = height;
+        self.chunkSize = chunkSize;
     }
 
-    register(entity) {
+    register(entity = new Entity()) {
         const self = this;
-        let cx = entity.x - entity.x % 64;
-        let cy = entity.y - entity.y % 64;
+
+        let cx = entity.position.x - entity.position.x % self.chunkSize;
+        let cy = entity.position.y - entity.position.y % self.chunkSize;
         let ci = `${cx},${cy}`;
+
         if (!self.chunks[ci]) {
             self.chunks[ci] = new Chunk();
         }
@@ -18,23 +22,24 @@ class Game {
     }
 
     // TODO: ensure all entities update chunk residency if moving
-    remove(entity) {
+    remove(entity = new Entity()) {
         const self = this;
-        let cx = entity.x - entity.x % 64;
-        let cy = entity.y - entity.y % 64;
+
+        let cx = entity.position.x - entity.position.x % self.chunkSize;
+        let cy = entity.position.y - entity.position.y % self.chunkSize;
         let ci = `${cx},${cy}`;
         if (self.chunks[ci]) {
             self.chunks[ci].remove(entity);
         }
     }
 
-    lookup(className, lx, ly, radius) {
+    lookup(className = "Entity", position = new Vector2(), radius = 64) {
         const self = this;
         let output = new Set();
-        for (let x = lx - radius; x <= lx + radius; x += 64) {
-            for (let y = ly - radius; y <= ly + radius; y += 64) {
-                let cx = x - x % 64;
-                let cy = y - y % 64;
+        for (let x = position.x - radius; x <= position.x + radius; x += self.chunkSize) {
+            for (let y = position.y - radius; y <= position.y + radius; y += self.chunkSize) {
+                let cx = x - x % self.chunkSize;
+                let cy = y - y % self.chunkSize;
                 let ci = `${cx},${cy}`;
                 if (self.chunks[ci] && self.chunks[ci].entities[className]) {
                     for (let entity of self.chunks[ci].entities[className]) {
