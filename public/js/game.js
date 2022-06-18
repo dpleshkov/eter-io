@@ -64,11 +64,11 @@ document.addEventListener("keydown", (evt) => {
     }
     if (movement.right - movement.left || movement.down - movement.up) {
         let dir = Math.atan2(movement.down - movement.up, movement.right - movement.left);
-        player.velocity.x = 15 * Math.cos(dir);
-        player.velocity.y = 15 * Math.sin(dir);
+        player.movementAcceleration.x = 15 * Math.cos(dir);
+        player.movementAcceleration.y = 15 * Math.sin(dir);
     } else {
-        player.velocity.x = 0;
-        player.velocity.y = 0;
+        player.movementAcceleration.x = 0;
+        player.movementAcceleration.y = 0;
     }
 });
 
@@ -84,11 +84,11 @@ document.addEventListener("keyup", (evt) => {
     }
     if (movement.right - movement.left || movement.down - movement.up) {
         let dir = Math.atan2(movement.down - movement.up, movement.right - movement.left);
-        player.velocity.x = 15 * Math.cos(dir);
-        player.velocity.y = 15 * Math.sin(dir);
+        player.movementAcceleration.x = 15 * Math.cos(dir);
+        player.movementAcceleration.y = 15 * Math.sin(dir);
     } else {
-        player.velocity.x = 0;
-        player.velocity.y = 0;
+        player.movementAcceleration.x = 0;
+        player.movementAcceleration.y = 0;
     }
 });
 

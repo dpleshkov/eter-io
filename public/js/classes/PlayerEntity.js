@@ -7,7 +7,9 @@ class PlayerEntity extends Entity {
         self.color = options.color || "#e86a6a";
         self.name = options.name || "Player";
 
-        self.acceleration = options.acceleration || new Vector2();
+        self.movementAcceleration = options.movementAcceleration || new Vector2();
+        self.friction = options.friction || 0;
+        self.maxSpeed = options.maxSpeed || 10;
         self.apparentVelocity = new Vector2();
         self.lastMoved = Date.now();
     }
@@ -22,6 +24,7 @@ class PlayerEntity extends Entity {
         return Math.PI * self.radius * self.radius;
     }
 
+    // DECREPIT
     resolveCollisions(obstacles = new Set(), nextPosition = new Vector2()) {
         const self = this;
 
@@ -63,6 +66,7 @@ class PlayerEntity extends Entity {
             nextPosition.x -= adjustDistance * Math.cos(adjustAngle);
             nextPosition.y -= adjustDistance * Math.sin(adjustAngle);
 
+            /*
             // Adjust nextVelocity
             let normal = adjustAngle;
             let incoming = nextVelocity.direction;
@@ -71,7 +75,7 @@ class PlayerEntity extends Entity {
             // let deltaV = 2 * nextVelocity.magnitude * Math.sin((adjustAngle + Math.PI / 2));
 
             //nextVelocity.x = currentSpeed * Math.cos(outgoing) * 0.8;
-            //nextVelocity.y = currentSpeed * Math.sin(outgoing) * 0.8;
+            //nextVelocity.y = currentSpeed * Math.sin(outgoing) * 0.8;*/
         }
         return {
             position: nextPosition,
@@ -85,8 +89,8 @@ class PlayerEntity extends Entity {
         let now = Date.now();
         let dt = ((now - self.lastMoved)/1000);
 
-        let nextPosition = self.position.clone().add(new Vector(dt * self.velocity.x, dt * self.velocity.y));
-        let nextVelocity = self.velocity.clone();
+        let nextVelocity = self.velocity.clone().add(self.movementAcceleration.clone().multiplyScalar(dt));
+        let nextPosition = self.position.clone().add(new Vector(dt * nextVelocity.x, dt * nextVelocity.y));
         let currentSpeed = nextVelocity.length();
 
         let colliders = new Set([
@@ -123,10 +127,12 @@ class PlayerEntity extends Entity {
             //nextVelocity.y = -nextVelocity.y;
         }
 
+        self.apparentVelocity = nextPosition.clone().sub(self.position).multiplyScalar(1/dt);
         self.moveTo(nextPosition);
         //self.x = nextPosition.x;
         //self.y = nextPosition.y;
-        self.velocity = nextVelocity;
+        self.velocity = self.apparentVelocity.clone();
+
         //self.vx = nextVelocity.x;
         //self.vy = nextVelocity.y;
 
@@ -152,6 +158,7 @@ class PlayerEntity extends Entity {
 
         let position = new Vector2(dx, dy);
         let velocity = new Vector2(vx, vy);
+        velocity.add(self.velocity);
 
         return new ProjectileEntity(position, velocity, self.game, {
             color: self.color,
@@ -170,10 +177,8 @@ class PlayerEntity extends Entity {
         let cy = camera.canvas.height / 2;
         dx = dx * camera.scale;
         dy = dy * camera.scale;
-        camera.ctx.beginPath();
-        camera.ctx.fillStyle = self.color;
-        camera.ctx.arc(cx + dx, cy + dy, self.radius * camera.scale, 0, 2 * Math.PI);
-        camera.ctx.fill();
+
+        camera.drawCircle(self.position, self.color, self.radius);
 
         // Render name
         camera.ctx.beginPath();

@@ -85,9 +85,6 @@ class ProjectileEntity extends Entity {
 
                 if (obstacle.constructor.name === "CircleObstacle") {
                     self.bounces += 1;
-                    if (self.bounces > self.maxBounces) {
-                        self.destroyOnNextTick = true;
-                    }
                 }
             }
         }
@@ -95,18 +92,26 @@ class ProjectileEntity extends Entity {
         if (nextPosition.x - self.radius < 0) {
             nextPosition.x = self.radius;
             nextVelocity.x = -nextVelocity.x;
+            self.bounces++;
         }
         if (nextPosition.x + self.radius > self.game.width) {
             nextPosition.x = self.game.width - self.radius;
             nextVelocity.x = -nextVelocity.x;
+            self.bounces++;
         }
         if (nextPosition.y - self.radius < 0) {
             nextPosition.y = self.radius;
             nextVelocity.y = -nextVelocity.y;
+            self.bounces++;
         }
         if (nextPosition.y + self.radius > self.game.height) {
             nextPosition.y = self.game.height - self.radius;
             nextVelocity.y = -nextVelocity.y;
+            self.bounces++;
+        }
+
+        if (self.bounces > self.maxBounces) {
+            self.destroyOnNextTick = true;
         }
 
         self.moveTo(nextPosition);
@@ -118,7 +123,6 @@ class ProjectileEntity extends Entity {
     }
 
     draw(camera) {
-        console.log("Projectile draw called");
         const self = this;
 
         let dx = self.position.x - camera.position.x;

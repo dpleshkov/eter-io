@@ -101,18 +101,40 @@ class Camera {
         });
     }
 
-    drawLine(x1, y1, x2, y2, color="#ffffff") {
+    drawLine(x1, y1, x2, y2, color="#ffffff", width = 1) {
         const self = this;
 
-        let a1 = (self.canvas.width / 2) + ((x1 - self.position.x) * camera.scale);
-        let b1 = (self.canvas.height / 2) + ((y1 - self.position.y) * camera.scale);
-        let a2 = (self.canvas.width / 2) + ((x2 - self.position.x) * camera.scale);
-        let b2 = (self.canvas.height / 2) + ((y2 - self.position.y) * camera.scale);
+        let a1 = (self.canvas.width / 2) + ((x1 - self.position.x) * self.scale);
+        let b1 = (self.canvas.height / 2) + ((y1 - self.position.y) * self.scale);
+        let a2 = (self.canvas.width / 2) + ((x2 - self.position.x) * self.scale);
+        let b2 = (self.canvas.height / 2) + ((y2 - self.position.y) * self.scale);
 
         self.ctx.beginPath();
         self.ctx.strokeStyle = color;
+        self.ctx.lineWidth = width;
         self.ctx.moveTo(a1, b1);
         self.ctx.lineTo(a2, b2);
         self.ctx.stroke();
+    }
+
+    toCanvasCoords(position = new Vector2()) {
+        const self = this;
+
+        let c = position.clone();
+        c.x = (self.canvas.width / 2) + ((c.x - self.position.x) * self.scale);
+        c.y = (self.canvas.height / 2) + ((c.y - self.position.y) * self.scale);
+
+        return c;
+    }
+
+    drawCircle(position = new Vector2(), color = "#ffffff", radius = 1) {
+        const self = this;
+
+        let c = self.toCanvasCoords(position);
+
+        self.ctx.beginPath();
+        self.ctx.fillStyle = color;
+        self.ctx.arc(c.x, c.y, radius * self.scale, 0, 2*Math.PI);
+        self.ctx.fill();
     }
 }
