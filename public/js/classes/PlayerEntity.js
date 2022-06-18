@@ -95,7 +95,6 @@ class PlayerEntity extends Entity {
         let relativeAcceleration = self.movementAcceleration.clone().rotateAround(new Vector2(), -nextVelocity.angle()).multiplyScalar(dt);
 
         let cspeed = relativeMovement.x;
-        console.log(cspeed);
 
         if (relativeMovement.x < self.maxSpeed) relativeMovement.x += relativeAcceleration.x;
         relativeMovement.y += relativeAcceleration.y;
@@ -191,6 +190,9 @@ class PlayerEntity extends Entity {
         let position = new Vector2(dx, dy);
         let velocity = new Vector2(vx, vy);
         velocity.add(self.velocity);
+
+        let recoilCoefficient = 0.2;
+        self.velocity.sub(new Vector2(vx, vy).multiplyScalar(recoilCoefficient));
 
         return new ProjectileEntity(position, velocity, self.game, {
             color: self.color,
