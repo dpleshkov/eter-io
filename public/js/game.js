@@ -29,7 +29,8 @@ for (let x = 0; x < 512; x++) {
 let camera = new Camera(canvas, game);
 let player = new PlayerEntity(new Vector2(32, 32), new Vector2(), game, {
     name: "Player",
-    friction: 10
+    friction: 10,
+    maxSpeed: 10
 });
 
 camera.tracking = player;
@@ -65,8 +66,8 @@ document.addEventListener("keydown", (evt) => {
     }
     if (movement.right - movement.left || movement.down - movement.up) {
         let dir = Math.atan2(movement.down - movement.up, movement.right - movement.left);
-        player.movementAcceleration.x = 15 * Math.cos(dir);
-        player.movementAcceleration.y = 15 * Math.sin(dir);
+        player.movementAcceleration.x = 30 * Math.cos(dir);
+        player.movementAcceleration.y = 30 * Math.sin(dir);
     } else {
         player.movementAcceleration.x = 0;
         player.movementAcceleration.y = 0;
@@ -85,8 +86,8 @@ document.addEventListener("keyup", (evt) => {
     }
     if (movement.right - movement.left || movement.down - movement.up) {
         let dir = Math.atan2(movement.down - movement.up, movement.right - movement.left);
-        player.movementAcceleration.x = 15 * Math.cos(dir);
-        player.movementAcceleration.y = 15 * Math.sin(dir);
+        player.movementAcceleration.x = 30 * Math.cos(dir);
+        player.movementAcceleration.y = 30 * Math.sin(dir);
     } else {
         player.movementAcceleration.x = 0;
         player.movementAcceleration.y = 0;

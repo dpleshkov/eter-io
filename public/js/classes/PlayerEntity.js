@@ -94,8 +94,12 @@ class PlayerEntity extends Entity {
         let relativeMovement = self.velocity.clone().rotateAround(new Vector2(), -self.velocity.angle());
         let relativeAcceleration = self.movementAcceleration.clone().rotateAround(new Vector2(), -nextVelocity.angle()).multiplyScalar(dt);
 
+        let cspeed = relativeMovement.x;
+        console.log(cspeed);
+
         if (relativeMovement.x < self.maxSpeed) relativeMovement.x += relativeAcceleration.x;
         relativeMovement.y += relativeAcceleration.y;
+        if (cspeed > self.maxSpeed) relativeMovement.x = Math.sqrt(cspeed ** 2 - relativeMovement.y ** 2);
 
         relativeMovement.rotateAround(new Vector2(), self.velocity.angle());
 
@@ -108,7 +112,7 @@ class PlayerEntity extends Entity {
         //let nextVelocity = self.velocity.clone().add(self.movementAcceleration.clone().multiplyScalar(dt));
         let speed = nextVelocity.length();
         let speedReduction = self.friction * dt;
-        if (speed > 0 && self.movementAcceleration.length() === 0) {
+        if (speed > 0 /*&& self.movementAcceleration.length() === 0*/) {
             if (speed < speedReduction) {
                 nextVelocity.x = 0;
                 nextVelocity.y = 0;
