@@ -28,7 +28,8 @@ for (let x = 0; x < 512; x++) {
 
 let camera = new Camera(canvas, game);
 let player = new PlayerEntity(new Vector2(32, 32), new Vector2(), game, {
-    name: "Player"
+    name: "Player",
+    friction: 10
 });
 
 camera.tracking = player;

@@ -95,6 +95,7 @@ class Camera {
         self.ctx.font = `${0.5 * self.scale}px Helvetica Neue`;
         self.ctx.fillStyle = "#ffffff";
         self.ctx.fillText(`MSPT: ${mspt}`, self.scale/2, self.scale);
+        self.ctx.fillText(`Speed: ${player.velocity.length().toFixed(2)}`, self.scale/2, 2*self.scale);
 
         requestAnimationFrame(() => {
             self.render();

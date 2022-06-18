@@ -89,7 +89,35 @@ class PlayerEntity extends Entity {
         let now = Date.now();
         let dt = ((now - self.lastMoved)/1000);
 
-        let nextVelocity = self.velocity.clone().add(self.movementAcceleration.clone().multiplyScalar(dt));
+        let nextVelocity = self.velocity.clone();
+
+        let relativeMovement = self.velocity.clone().rotateAround(new Vector2(), -self.velocity.angle());
+        let relativeAcceleration = self.movementAcceleration.clone().rotateAround(new Vector2(), -nextVelocity.angle()).multiplyScalar(dt);
+
+        if (relativeMovement.x < self.maxSpeed) relativeMovement.x += relativeAcceleration.x;
+        relativeMovement.y += relativeAcceleration.y;
+
+        relativeMovement.rotateAround(new Vector2(), self.velocity.angle());
+
+        nextVelocity = relativeMovement;
+
+
+        /*if (self.velocity.length() < self.maxSpeed) {
+            nextVelocity = self.velocity.clone().add(self.movementAcceleration.clone().multiplyScalar(dt));
+        }*/
+        //let nextVelocity = self.velocity.clone().add(self.movementAcceleration.clone().multiplyScalar(dt));
+        let speed = nextVelocity.length();
+        let speedReduction = self.friction * dt;
+        if (speed > 0 && self.movementAcceleration.length() === 0) {
+            if (speed < speedReduction) {
+                nextVelocity.x = 0;
+                nextVelocity.y = 0;
+            } else {
+                nextVelocity.normalize().multiplyScalar(speed - speedReduction);
+            }
+        }
+        speed = nextVelocity.length();
+
         let nextPosition = self.position.clone().add(new Vector(dt * nextVelocity.x, dt * nextVelocity.y));
         let currentSpeed = nextVelocity.length();
 
