@@ -51,12 +51,13 @@ class ProjectileEntity extends Entity {
 
         } else if (obstacle.constructor.name === "PlayerEntity") {
             let angleToPlayer = obstacle.position.clone().sub(self.position).angle();
-            let relativeVelocity = self.velocity.clone().sub(obstacle.velocity);
+            let relativeVelocity = nextVelocity.clone().sub(obstacle.velocity);
 
             let relativeSpeedToTarget = relativeVelocity.clone().rotateAround(new Vector2(), -angleToPlayer).x;
             if (relativeSpeedToTarget > 0) {
                 obstacle.hp -= relativeSpeedToTarget * obstacle.damageMultiplier;
             }
+            self.destroy();
 
         }
         return {
@@ -67,6 +68,7 @@ class ProjectileEntity extends Entity {
 
     tick() {
         const self = this;
+        if (self.destroyed) return;
 
         if (self.destroyOnNextTick) {
             self.destroy();
@@ -133,6 +135,7 @@ class ProjectileEntity extends Entity {
 
     draw(camera) {
         const self = this;
+        if (self.destroyed) return;
 
         let dx = self.position.x - camera.position.x;
         let dy = self.position.y - camera.position.y;

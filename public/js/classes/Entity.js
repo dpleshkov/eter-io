@@ -5,6 +5,7 @@ class Entity {
         self.position = position;
         self.velocity = velocity;
         self.game = game;
+        self.destroyed = false;
 
         self._register();
     }
@@ -24,6 +25,7 @@ class Entity {
         const self = this;
 
         self.game.chunks[self.chunkIndex].remove(self);
+        self.destroyed = true;
 
         delete this;
     }
