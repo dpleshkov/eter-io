@@ -49,6 +49,15 @@ class ProjectileEntity extends Entity {
             velocity.x = currentSpeed * Math.cos(outgoing) * 1;
             velocity.y = currentSpeed * Math.sin(outgoing) * 1;
 
+        } else if (obstacle.constructor.name === "PlayerEntity") {
+            let angleToPlayer = obstacle.position.clone().sub(self.position).angle();
+            let relativeVelocity = self.velocity.clone().sub(obstacle.velocity);
+
+            let relativeSpeedToTarget = relativeVelocity.clone().rotateAround(new Vector2(), -angleToPlayer).x;
+            if (relativeSpeedToTarget > 0) {
+                obstacle.hp -= relativeSpeedToTarget * obstacle.damageMultiplier;
+            }
+
         }
         return {
             position: position,
@@ -73,7 +82,7 @@ class ProjectileEntity extends Entity {
 
         let possibleCollisions = new Set([
             ...self.game.lookup("CircleObstacle", self.position, 32),
-            //...self.game.lookup("PlayerEntity", self.x, self.y, 32)
+            ...self.game.lookup("PlayerEntity", self.position, 32)
         ]);
 
         for (let obstacle of possibleCollisions) {

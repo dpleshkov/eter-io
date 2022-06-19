@@ -57,11 +57,11 @@ class Camera {
 
         for (let x = 0; x <= self.game.width/self.game.chunkSize; x++) {
             let color = (x === 0 || x === self.game.width / self.game.chunkSize) ? "#ffffff" : "#99AAB5";
-            self.drawLine(x * self.game.chunkSize, 0, x * self.game.chunkSize, self.game.height, color);
+            self.drawLine(x * self.game.chunkSize, 0, x * self.game.chunkSize, self.game.height, color, 1/self.scale);
         }
         for (let y = 0; y <= self.game.height/self.game.chunkSize; y++) {
             let color = (y === 0 || y === self.game.width / self.game.chunkSize) ? "#ffffff" : "#99AAB5";
-            self.drawLine(0, y * self.game.chunkSize, self.game.width, y * self.game.chunkSize, color);
+            self.drawLine(0, y * self.game.chunkSize, self.game.width, y * self.game.chunkSize, color, 1/self.scale);
         }
 
         /*self.drawLine(0, 0, 0, self.game.height);
@@ -112,7 +112,7 @@ class Camera {
 
         self.ctx.beginPath();
         self.ctx.strokeStyle = color;
-        self.ctx.lineWidth = width;
+        self.ctx.lineWidth = width * self.scale;
         self.ctx.moveTo(a1, b1);
         self.ctx.lineTo(a2, b2);
         self.ctx.stroke();

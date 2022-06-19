@@ -10,8 +10,16 @@ class PlayerEntity extends Entity {
         self.movementAcceleration = options.movementAcceleration || new Vector2();
         self.friction = options.friction || 0;
         self.maxSpeed = options.maxSpeed || 10;
+        self.firingCooldown = options.firingCooldown || 300;
         self.apparentVelocity = new Vector2();
         self.lastMoved = Date.now();
+        self.lastFired = Date.now();
+
+        self.maxHp = options.maxHp || 100;
+        self.hp = options.hp || self.maxHp;
+        self.damageMultiplier = options.damageMultiplier || 0.1;
+        self.healthRegen = options.healthRegen || 5;
+        self.dead = false;
     }
 
     _register() {
@@ -85,6 +93,13 @@ class PlayerEntity extends Entity {
 
     tick() {
         const self = this;
+
+        if (self.hp <= 0) {
+            self.destroy();
+            self.dead = true;
+            self.velocity = new Vector2();
+            return;
+        }
 
         let now = Date.now();
         let dt = ((now - self.lastMoved)/1000);
@@ -177,10 +192,20 @@ class PlayerEntity extends Entity {
         self.ci = newCi;*/
 
         self.lastMoved = Date.now();
+
+        // Regen health
+
+        self.hp += self.healthRegen * dt;
+        if (self.hp > self.maxHp) self.hp = self.maxHp;
     }
 
     fire(direction = 0, speed = 10, radius= 0.5) {
         const self = this;
+
+        if (self.dead) return;
+
+        let now = Date.now();
+        if (now - self.lastFired < self.firingCooldown) return;
 
         let dx = self.position.x + ((self.radius + radius) * Math.cos(direction));
         let dy = self.position.y + ((self.radius + radius) * Math.sin(direction));
@@ -193,6 +218,8 @@ class PlayerEntity extends Entity {
 
         let recoilCoefficient = 0.2;
         self.velocity.sub(new Vector2(vx, vy).multiplyScalar(recoilCoefficient));
+
+        self.lastFired = Date.now();
 
         return new ProjectileEntity(position, velocity, self.game, {
             color: self.color,
@@ -219,6 +246,34 @@ class PlayerEntity extends Entity {
         camera.ctx.textAlign = "center";
         camera.ctx.font = `${0.5 * camera.scale}px Helvetica Neue`;
         camera.ctx.fillText(self.name, cx + dx, cy + dy + (self.radius * camera.scale) + camera.scale);
+
+        // Render health bar background
+        let gray = "#3a3a3a";
+        let pointA = new Vector2(self.position.x - self.radius - 0.1, self.position.y - self.radius - 0.25);
+        let pointB = new Vector2(self.position.x + self.radius + 0.1, self.position.y - self.radius - 0.25);
+        camera.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, gray, 0.3);
+        camera.drawCircle(pointA, gray, 0.15);
+        camera.drawCircle(pointB, gray, 0.15);
+
+        // Render health bar red
+        let red = "#961e1e";
+        pointA = new Vector2(self.position.x - self.radius - 0.075, self.position.y - self.radius - 0.25);
+        pointB = new Vector2(self.position.x + self.radius + 0.075, self.position.y - self.radius - 0.25);
+        camera.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, red, 0.15);
+        camera.drawCircle(pointA, red, 0.075);
+        camera.drawCircle(pointB, red, 0.075);
+
+        // Render health bar green
+        let green = "#1e961e";
+        pointA = new Vector2(self.position.x - self.radius - 0.075, self.position.y - self.radius - 0.25);
+        pointB = new Vector2(self.position.x + self.radius + 0.075, self.position.y - self.radius - 0.25);
+        let totalDist = pointB.x - pointA.x;
+        let dist = (self.hp / self.maxHp) * totalDist;
+        pointB.x = pointA.x + dist;
+        camera.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, green, 0.15);
+        camera.drawCircle(pointA, green, 0.075);
+        camera.drawCircle(pointB, green, 0.075);
+
 
     }
 }

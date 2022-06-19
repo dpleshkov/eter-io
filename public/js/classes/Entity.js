@@ -24,6 +24,7 @@ class Entity {
         const self = this;
 
         self.game.chunks[self.chunkIndex].remove(self);
+
         delete this;
     }
 

@@ -17,7 +17,7 @@ let ctx = canvas.getContext("2d");
 ctx.fillStyle = "#121212";
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-let game = new Game();
+let game = new Game(256, 256, 64);
 
 for (let x = 0; x < 512; x++) {
     new CircleObstacle(new Vector2(randint(3, 253), randint(3, 253)), game, {
