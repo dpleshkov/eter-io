@@ -17,7 +17,7 @@ class PlayerEntity extends Entity {
 
         self.maxHp = options.maxHp || 100;
         self.hp = options.hp || self.maxHp;
-        self.damageMultiplier = options.damageMultiplier || 0.1;
+        self.damageMultiplier = options.damageMultiplier || 0.3;
         self.healthRegen = options.healthRegen || 5;
         self.dead = false;
     }
