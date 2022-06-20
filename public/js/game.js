@@ -1,3 +1,5 @@
+window.simulatedPing = 100;
+
 window.DEBUG = true;
 
 let randint = function(min, max) {
@@ -55,52 +57,58 @@ let movement = {
 });*/
 
 document.addEventListener("keydown", (evt) => {
-    if (evt.code === "KeyW") {
-        movement.up = 10;
-    } else if (evt.code === "KeyS") {
-        movement.down = 10;
-    } else if (evt.code === "KeyA") {
-        movement.left = 10;
-    } else if (evt.code === "KeyD") {
-        movement.right = 10;
-    }
-    if (movement.right - movement.left || movement.down - movement.up) {
-        let dir = Math.atan2(movement.down - movement.up, movement.right - movement.left);
-        player.movementAcceleration.x = 30 * Math.cos(dir);
-        player.movementAcceleration.y = 30 * Math.sin(dir);
-    } else {
-        player.movementAcceleration.x = 0;
-        player.movementAcceleration.y = 0;
-    }
+    setTimeout(() => {
+        if (evt.code === "KeyW") {
+            movement.up = 10;
+        } else if (evt.code === "KeyS") {
+            movement.down = 10;
+        } else if (evt.code === "KeyA") {
+            movement.left = 10;
+        } else if (evt.code === "KeyD") {
+            movement.right = 10;
+        }
+        if (movement.right - movement.left || movement.down - movement.up) {
+            let dir = Math.atan2(movement.down - movement.up, movement.right - movement.left);
+            player.movementAcceleration.x = 30 * Math.cos(dir);
+            player.movementAcceleration.y = 30 * Math.sin(dir);
+        } else {
+            player.movementAcceleration.x = 0;
+            player.movementAcceleration.y = 0;
+        }
+    }, simulatedPing);
 });
 
 document.addEventListener("keyup", (evt) => {
-    if (evt.code === "KeyW") {
-        movement.up = 0;
-    } else if (evt.code === "KeyS") {
-        movement.down = 0;
-    } else if (evt.code === "KeyA") {
-        movement.left = 0;
-    } else if (evt.code === "KeyD") {
-        movement.right = 0;
-    }
-    if (movement.right - movement.left || movement.down - movement.up) {
-        let dir = Math.atan2(movement.down - movement.up, movement.right - movement.left);
-        player.movementAcceleration.x = 30 * Math.cos(dir);
-        player.movementAcceleration.y = 30 * Math.sin(dir);
-    } else {
-        player.movementAcceleration.x = 0;
-        player.movementAcceleration.y = 0;
-    }
+    setTimeout(() => {
+        if (evt.code === "KeyW") {
+            movement.up = 0;
+        } else if (evt.code === "KeyS") {
+            movement.down = 0;
+        } else if (evt.code === "KeyA") {
+            movement.left = 0;
+        } else if (evt.code === "KeyD") {
+            movement.right = 0;
+        }
+        if (movement.right - movement.left || movement.down - movement.up) {
+            let dir = Math.atan2(movement.down - movement.up, movement.right - movement.left);
+            player.movementAcceleration.x = 30 * Math.cos(dir);
+            player.movementAcceleration.y = 30 * Math.sin(dir);
+        } else {
+            player.movementAcceleration.x = 0;
+            player.movementAcceleration.y = 0;
+        }
+    }, simulatedPing);
 });
 
 document.addEventListener("click", (evt) => {
-    let cx = window.innerWidth / 2;
-    let cy = window.innerHeight / 2;
+    setTimeout(() => {
+        let cx = window.innerWidth / 2;
+        let cy = window.innerHeight / 2;
 
-    let angle = Math.atan2(evt.clientY - cy, evt.clientX - cx);
+        let angle = Math.atan2(evt.clientY - cy, evt.clientX - cx);
 
-    player.fire(angle, 30, 0.25);
+        player.fire(angle, 30, 0.25);
+    }, simulatedPing);
 });
 
 window.addEventListener("resize", (evt) => {
