@@ -1,9 +1,13 @@
+if (typeof require !== "undefined" && typeof global !== "undefined") {
+    global.Vector2 = require("./Vector2").Vector2;
+    global.Game = require("./Game").Game;
+    global.Entity = require("./Entity").Entity;
+}
+
 class ProjectileEntity extends Entity {
     constructor(position = new Vector2(), velocity = new Vector2(), game = new Game(), options = {}) {
         super(position, velocity, game);
         const self = this;
-
-        console.log(this);
 
         self.radius = options.radius || 0.25;
         self.color = options.color || "#ffffff";
@@ -148,4 +152,8 @@ class ProjectileEntity extends Entity {
         camera.ctx.arc(cx + dx, cy + dy, self.radius * camera.scale, 0, 2 * Math.PI);
         camera.ctx.fill();
     }
+}
+
+if (typeof module !== "undefined") {
+    module.exports.ProjectileEntity = ProjectileEntity;
 }

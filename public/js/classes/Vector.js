@@ -18,3 +18,7 @@ class Vector {
         return Math.hypot(self.y, self.x);
     }
 }
+
+if (typeof module !== "undefined") {
+    module.exports.Vector = Vector;
+}

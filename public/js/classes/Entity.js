@@ -1,3 +1,8 @@
+if (typeof require !== "undefined" && typeof global !== "undefined") {
+    global.Vector2 = require("./Vector2").Vector2;
+    global.Game = require("./Game").Game;
+}
+
 class Entity {
     constructor(position = new Vector2(), velocity = new Vector2(), game = new Game()) {
         const self = this;
@@ -11,7 +16,6 @@ class Entity {
     }
 
     _register() {
-        if (window.DEBUG) console.log("Entity::_register called");
         const self = this;
 
         let chunkIndex = self.chunkIndex;
@@ -91,4 +95,8 @@ class Entity {
 
         return self.velocity.y;
     }
+}
+
+if (typeof module !== "undefined") {
+    module.exports.Entity = Entity;
 }

@@ -1,3 +1,8 @@
+if (typeof require !== "undefined" && typeof global !== "undefined") {
+    global.Vector2 = require("./Vector2").Vector2;
+    global.Chunk = require("./Chunk").Chunk;
+}
+
 class Game {
     constructor(width = 256, height = 256, chunkSize = 64) {
         const self = this;
@@ -50,4 +55,8 @@ class Game {
         }
         return output;
     }
+}
+
+if (typeof module !== "undefined") {
+    module.exports.Game = Game;
 }

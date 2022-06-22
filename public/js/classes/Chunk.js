@@ -20,3 +20,7 @@ class Chunk {
         return false;
     }
 }
+
+if (typeof module !== "undefined") {
+    module.exports.Chunk = Chunk;
+}

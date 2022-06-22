@@ -1,3 +1,9 @@
+if (typeof require !== "undefined" && typeof global !== "undefined") {
+    global.Vector2 = require("./Vector2").Vector2;
+    global.Game = require("./Game").Game;
+    global.Entity = require("./Entity").Entity;
+}
+
 class PlayerEntity extends Entity {
     constructor(position = new Vector2(), velocity = new Vector2(), game = new Game(), options = {}) {
         super(position, velocity, game);
@@ -8,7 +14,7 @@ class PlayerEntity extends Entity {
         self.name = options.name || "Player";
 
         self.movementAcceleration = options.movementAcceleration || new Vector2();
-        self.friction = options.friction || 0;
+        self.friction = options.friction || 10;
         self.maxSpeed = options.maxSpeed || 10;
         self.firingCooldown = options.firingCooldown || 300;
         self.apparentVelocity = new Vector2();
@@ -20,10 +26,12 @@ class PlayerEntity extends Entity {
         self.damageMultiplier = options.damageMultiplier || 1;
         self.healthRegen = options.healthRegen || 5;
         self.dead = false;
+        self.id = typeof options.id === "undefined" ? 1 : options.id;
+
+        self.socket = options.socket || undefined;
     }
 
     _register() {
-        if (window.DEBUG) console.log("PlayerEntity::_register called");
         super._register();
     }
 
@@ -94,6 +102,11 @@ class PlayerEntity extends Entity {
     tick() {
         const self = this;
 
+        if (self.destroyOnNextTick) {
+            self.destroy();
+            return;
+        }
+
         if (self.hp <= 0) {
             self.destroy();
             self.dead = true;
@@ -136,7 +149,7 @@ class PlayerEntity extends Entity {
         }
         speed = nextVelocity.length();
 
-        let nextPosition = self.position.clone().add(new Vector(dt * nextVelocity.x, dt * nextVelocity.y));
+        let nextPosition = self.position.clone().add(new Vector2(dt * nextVelocity.x, dt * nextVelocity.y));
         let currentSpeed = nextVelocity.length();
 
         let colliders = new Set([
@@ -202,7 +215,7 @@ class PlayerEntity extends Entity {
     fire(direction = 0, speed = 10, radius= 0.5) {
         const self = this;
 
-        if (self.dead) return;
+        if (self.destroyed || self.dead) return;
 
         let now = Date.now();
         if (now - self.lastFired < self.firingCooldown) return;
@@ -231,6 +244,8 @@ class PlayerEntity extends Entity {
 
     draw(camera) {
         const self = this;
+
+        if (self.destroyed || self.dead) return;
 
         let dx = self.position.x - camera.position.x;
         let dy = self.position.y - camera.position.y;
@@ -273,7 +288,9 @@ class PlayerEntity extends Entity {
         camera.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, green, 0.15);
         camera.drawCircle(pointA, green, 0.075);
         camera.drawCircle(pointB, green, 0.075);
-
-
     }
+}
+
+if (typeof module !== "undefined") {
+    module.exports.PlayerEntity = PlayerEntity;
 }

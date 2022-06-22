@@ -1,3 +1,7 @@
+if (typeof require !== "undefined" && typeof global !== "undefined") {
+    global.Vector2 = require("./Vector2").Vector2;
+}
+
 class Util {
     static distance(a, b) {
         return Math.hypot(a.x - b.x, a.y - b.y);
@@ -20,4 +24,14 @@ class Util {
         let y4 = y0 + ((b * xa) / a);
         return [new Vector2(x3, y3), new Vector2(x4, y4)];
     }
+
+    static randInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+}
+
+if (typeof module !== "undefined") {
+    module.exports.Util = Util;
 }

@@ -1,3 +1,7 @@
+if (typeof require !== "undefined" && typeof global !== "undefined") {
+    global.Vector2 = require("./Vector2").Vector2;
+}
+
 class Camera {
     constructor(canvas, game) {
         const self = this;
@@ -95,7 +99,7 @@ class Camera {
         self.ctx.font = `${0.5 * self.scale}px Helvetica Neue`;
         self.ctx.fillStyle = "#ffffff";
         self.ctx.fillText(`MSPT: ${mspt}`, self.scale/2, self.scale);
-        self.ctx.fillText(`Speed: ${player.velocity.length().toFixed(2)}`, self.scale/2, 2*self.scale);
+        //self.ctx.fillText(`Speed: ${player.velocity.length().toFixed(2)}`, self.scale/2, 2*self.scale);
 
         requestAnimationFrame(() => {
             self.render();
@@ -138,4 +142,8 @@ class Camera {
         self.ctx.arc(c.x, c.y, radius * self.scale, 0, 2*Math.PI);
         self.ctx.fill();
     }
+}
+
+if (typeof module !== "undefined") {
+    module.exports.Camera = Camera;
 }

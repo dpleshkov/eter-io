@@ -23,7 +23,7 @@ let game = new Game(256, 256, 64);
 
 for (let x = 0; x < 512; x++) {
     new CircleObstacle(new Vector2(randint(3, 253), randint(3, 253)), game, {
-        radius: randint(1, 3),
+        radius: randint(1, 4),
         color: "#ffffff"
     })
 }
