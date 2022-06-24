@@ -18,6 +18,11 @@ class ProjectileEntity extends Entity {
         self.bounces = 0;
         self.maxBounces = options.maxBounces || 1;
         self.destroyOnNextTick = false;
+
+        self.lifespan = options.lifespan || -1;
+        self.created = Date.now();
+
+        self.sentTo = options.sentTo || new Set();
     }
 
     get mass() {
@@ -74,7 +79,7 @@ class ProjectileEntity extends Entity {
         const self = this;
         if (self.destroyed) return;
 
-        if (self.destroyOnNextTick) {
+        if (self.destroyOnNextTick || (self.lifespan !== -1 && Date.now() - self.created >= self.lifespan)) {
             self.destroy();
             return;
         }
@@ -82,7 +87,7 @@ class ProjectileEntity extends Entity {
         let now = Date.now();
         let dt = ((now - self.lastMoved)/1000);
 
-        let nextPosition = self.position.clone().add(new Vector(dt * self.velocity.x, dt * self.velocity.y));
+        let nextPosition = self.position.clone().add(new Vector2(dt * self.velocity.x, dt * self.velocity.y));
         let nextVelocity = self.velocity.clone();
         let currentSpeed = nextVelocity.length();
 
@@ -126,7 +131,9 @@ class ProjectileEntity extends Entity {
         }
 
         if (self.bounces > self.maxBounces) {
-            self.destroyOnNextTick = true;
+            self.destroy();
+            return;
+            //self.destroyOnNextTick = true;
         }
 
         self.moveTo(nextPosition);

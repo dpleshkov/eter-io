@@ -21,6 +21,7 @@ window.addEventListener("resize", (evt) => {
 let socket = new WebSocket("ws://dmitry-laptop.local:8080");
 let players = [];
 let player = new PlayerEntity(new Vector2(128, 128), new Vector2(), game);
+player.disableDeathCheck = true;
 camera.tracking = player;
 
 socket.addEventListener("message", async(evt) => {
@@ -44,15 +45,16 @@ socket.addEventListener("message", async(evt) => {
             let ax = view.getFloat32(17);
             let ay = view.getFloat32(21);
             let r = view.getUint8(25);
-            let hp = view.getUint8(26);
-            let dead = view.getUint8(27) === 1;
-            let id = view.getUint8(28);
+            let hp = view.getFloat32(26);
+            let dead = view.getUint8(30) === 1;
+            let id = view.getUint8(31);
 
             if (!players[id]) {
                 players[id] = new PlayerEntity(new Vector2(x, y), new Vector2(vx, vy), game, {
                     radius: r,
                     hp: hp,
-                    id: id
+                    id: id,
+                    disableDeathCheck: true
                 });
             }
             players[id].moveTo(new Vector2(x, y));
@@ -62,6 +64,7 @@ socket.addEventListener("message", async(evt) => {
             players[id].movementAcceleration.y = ay;
             players[id].radius = r;
             players[id].dead = dead;
+            players[id].hp = hp;
         } else if (view.getUint8(0) === 226) {
             let now = Date.now();
             pingMeasurement = now - lastPing;
@@ -73,19 +76,41 @@ socket.addEventListener("message", async(evt) => {
                 socket.send(msg);
                 lastPing = Date.now();
             }, 250);
+        } else if (view.getUint8(0) === 38) {
+            let x = view.getFloat32(1);
+            let y = view.getFloat32(5);
+            let vx = view.getFloat32(9);
+            let vy = view.getFloat32(13);
+            let bounces = view.getUint8(17);
+            let projectile = new ProjectileEntity(new Vector2(x, y), new Vector2(vx, vy), game, {
+                color: player.color
+            });
+            projectile.bounces = bounces;
         }
     } else if (typeof data === "string" && data.startsWith("{")) {
         let json = JSON.parse(data);
         if (json.joined) {
             player.id = json.joined.id;
             players[json.joined.id] = player;
+
+            // Begin ping measurement
+            let msg = new ArrayBuffer(1);
+            let view = new DataView(msg);
+            view.setUint8(0, 225);
+            socket.send(msg);
+            lastPing = Date.now();
         }
-        let msg = new ArrayBuffer(1);
-        let view = new DataView(msg);
-        view.setUint8(0, 225);
-        socket.send(msg);
-        lastPing = Date.now();
+        if (json.name === "player_gone") {
+            if (players[json.data.id]) {
+                players[json.data.id].destroy();
+                players[json.data.id] = undefined;
+            }
+        }
     }
+});
+
+socket.addEventListener("close", () => {
+    camera.disconnected = true;
 });
 
 document.addEventListener("keydown", (evt) => {
@@ -154,5 +179,22 @@ document.addEventListener("keyup", (evt) => {
     }, pingMeasurement);
 });
 
-let pingMeasurement = 0;
+document.addEventListener("click", (evt) => {
+    let cx = window.innerWidth / 2;
+    let cy = window.innerHeight / 2;
+
+    let angle = Math.atan2(evt.clientY - cy, evt.clientX - cx);
+
+    let angleInt = Math.round(angle / 2 / Math.PI * 65536) % 65536;
+    let msg = new ArrayBuffer(3);
+    let view = new DataView(msg);
+    view.setUint8(0, 224);
+    view.setUint16(1, angleInt);
+    socket.send(msg);
+    setTimeout(() => {
+        player.fire(angle, 30, 0.25, pingMeasurement);
+    }, pingMeasurement);
+});
+
+window.pingMeasurement = 0;
 let lastPing = Date.now();

@@ -18,6 +18,8 @@ class Camera {
 
         self.tracking = self;
 
+        self.disconnected = false;
+
         self.resize();
     }
 
@@ -44,6 +46,17 @@ class Camera {
 
     render() {
         const self = this;
+
+        if (self.disconnected) {
+            self.ctx.fillStyle = "#121212";
+            self.ctx.fillRect(0, 0, self.canvas.width, self.canvas.height);
+            self.ctx.beginPath();
+            self.ctx.textAlign = "center";
+            self.ctx.font = `${0.5 * self.scale}px Helvetica Neue`;
+            self.ctx.fillStyle = "#ffffff";
+            self.ctx.fillText("Connection Lost", self.canvas.width / 2, self.canvas.height / 2);
+            return;
+        }
 
         let t1 = Date.now();
 
@@ -85,7 +98,7 @@ class Camera {
             player.tick();
         }
 
-        let projectiles = self.game.lookup("ProjectileEntity", self.position, self.fov);
+        let projectiles = self.game.lookup("ProjectileEntity", self.position, self.fov * 4);
         for (let projectile of projectiles) {
             projectile.draw(self);
             projectile.tick();
@@ -99,7 +112,7 @@ class Camera {
         self.ctx.font = `${0.5 * self.scale}px Helvetica Neue`;
         self.ctx.fillStyle = "#ffffff";
         self.ctx.fillText(`MSPT: ${mspt}`, self.scale/2, self.scale);
-        //self.ctx.fillText(`Speed: ${player.velocity.length().toFixed(2)}`, self.scale/2, 2*self.scale);
+        self.ctx.fillText(`Ping: ${window.pingMeasurement} ms`, self.scale/2, 2*self.scale);
 
         requestAnimationFrame(() => {
             self.render();

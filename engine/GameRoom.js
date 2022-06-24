@@ -116,8 +116,9 @@ class GameRoom {
                     let direction = view.getUint16(1);
                     let angle = direction / 65536 * 2 * Math.PI;
                     let projectile = player.fire(angle, 30, 0.25);
-                    for (let entity of self.players) {
-                        entity.socket.send(GameRoom.serialize(projectile));
+                    if (projectile) {
+                        player.socket.send(GameRoom.serialize(projectile));
+                        projectile.sentTo.add(player.entityId);
                     }
                 } else if (view.getUint8(0) === 225) {
                     let pong = new Uint8Array(1);
@@ -128,6 +129,7 @@ class GameRoom {
         }
 
         socket.onclose = function() {
+            if (!self.players[id]) return;
             self.players[id].destroy();
             delete self.players[id];
             self.players[id] = undefined;
@@ -140,20 +142,40 @@ class GameRoom {
 
         for (let player of self.players) {
             if (!player) continue;
+            if (player.dead || player.destroyed) {
+                for (let entity of self.players) {
+                    if (entity !== player) {
+                        entity.socket.send(JSON.stringify({
+                            name: "player_gone",
+                            data: {
+                                id: player.id
+                            }
+                        }));
+                    }
+                }
+                player.socket.close();
+                self.players[player.id] = undefined;
+                continue;
+            }
             player.tick();
             let players = self.game.lookup("PlayerEntity", player.position, 64);
             for (let entity of players) {
                 let data = GameRoom.serialize(entity);
                 player.socket.send(data);
             }
-            //let projectiles = self.game.lookup("ProjectileEntity", player.position, 64);
-            /*for (let entity of projectiles) {
-                player.socket.send(GameRoom.serialize(entity));
-            }*/
+            let projectiles = self.game.lookup("ProjectileEntity", player.position, 64);
+            for (let entity of projectiles) {
+                entity.tick();
+                if (!entity.sentTo.has(player.entityId)) {
+                    player.socket.send(GameRoom.serialize(entity));
+                    entity.sentTo.add(player.entityId);
+                }
+            }
         }
     }
 
     static serialize(entity) {
+        if (!entity) return;
         if (entity.constructor.name === "CircleObstacle") {
             let buffer = new ArrayBuffer(4);
             let view = new DataView(buffer);
@@ -165,7 +187,7 @@ class GameRoom {
 
             return buffer;
         } else if (entity.constructor.name === "PlayerEntity") {
-            let buffer = new ArrayBuffer(29);
+            let buffer = new ArrayBuffer(32);
             let view = new DataView(buffer);
 
             view.setUint8(0, 37);
@@ -176,9 +198,9 @@ class GameRoom {
             view.setFloat32(17, entity.movementAcceleration.x);
             view.setFloat32(21, entity.movementAcceleration.y);
             view.setUint8(25, entity.radius);
-            view.setUint8(26, entity.hp);
-            view.setUint8(27, entity.dead ? 1 : 0);
-            view.setUint8(28, entity.id);
+            view.setFloat32(26, entity.hp);
+            view.setUint8(30, entity.dead ? 1 : 0);
+            view.setUint8(31, entity.id);
 
             return buffer;
         } else if (entity.constructor.name === "ProjectileEntity") {

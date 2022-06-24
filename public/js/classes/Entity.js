@@ -12,6 +12,7 @@ class Entity {
         self.game = game;
         self.destroyed = false;
 
+        self.entityId = self.game.obtainUniqueEntityId();
         self._register();
     }
 

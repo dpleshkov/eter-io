@@ -11,6 +11,7 @@ class Game {
         self.width = width;
         self.height = height;
         self.chunkSize = chunkSize;
+        self.runningEntityId = 0;
     }
 
     register(entity = new Entity()) {
@@ -24,6 +25,13 @@ class Game {
             self.chunks[ci] = new Chunk();
         }
         self.chunks[ci].add(entity);
+    }
+
+    obtainUniqueEntityId() {
+        const self = this;
+
+        self.runningEntityId += 1;
+        return self.runningEntityId;
     }
 
     // TODO: ensure all entities update chunk residency if moving

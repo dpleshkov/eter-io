@@ -2,6 +2,7 @@ if (typeof require !== "undefined" && typeof global !== "undefined") {
     global.Vector2 = require("./Vector2").Vector2;
     global.Game = require("./Game").Game;
     global.Entity = require("./Entity").Entity;
+    global.ProjectileEntity = require("./ProjectileEntity").ProjectileEntity;
 }
 
 class PlayerEntity extends Entity {
@@ -29,6 +30,8 @@ class PlayerEntity extends Entity {
         self.id = typeof options.id === "undefined" ? 1 : options.id;
 
         self.socket = options.socket || undefined;
+
+        self.disableDeathCheck = options.disableDeathCheck || false;
     }
 
     _register() {
@@ -107,7 +110,7 @@ class PlayerEntity extends Entity {
             return;
         }
 
-        if (self.hp <= 0) {
+        if (self.hp <= 0 && !self.disableDeathCheck) {
             self.destroy();
             self.dead = true;
             self.velocity = new Vector2();
@@ -212,7 +215,7 @@ class PlayerEntity extends Entity {
         if (self.hp > self.maxHp) self.hp = self.maxHp;
     }
 
-    fire(direction = 0, speed = 10, radius= 0.5) {
+    fire(direction = 0, speed = 10, radius= 0.5, lifespan = -1) {
         const self = this;
 
         if (self.destroyed || self.dead) return;
@@ -236,7 +239,8 @@ class PlayerEntity extends Entity {
 
         return new ProjectileEntity(position, velocity, self.game, {
             color: self.color,
-            radius: radius
+            radius: radius,
+            lifespan: lifespan
         });
 
 
