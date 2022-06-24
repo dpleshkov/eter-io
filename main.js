@@ -9,7 +9,9 @@ app.use(express.static("public"));
 app.set("view engine", "ejs");
 
 app.get("/", (req, res) => {
-    return res.render("index");
+    return res.render("index", {
+        wsPath: process.env.ROOM_ADDRESS
+    });
 });
 
 app.get("/singleplayer", (req, res) => {

@@ -18,7 +18,7 @@ window.addEventListener("resize", (evt) => {
     //console.log(camera.scale);
 });
 
-let socket = new WebSocket("ws://dmitry-laptop.local:8080");
+let socket = new WebSocket(_ROOMADDRESS);
 let players = [];
 let player = new PlayerEntity(new Vector2(128, 128), new Vector2(), game);
 player.disableDeathCheck = true;

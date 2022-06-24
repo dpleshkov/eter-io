@@ -2,10 +2,22 @@ const {WebSocket, WebSocketServer} = require("ws");
 const {GameRoom} = require("./GameRoom");
 require("dotenv").config()
 
+let wss;
+let server;
 
-const wss = new WebSocketServer({
-    port: process.env.PORT
-});
+if (process.env.MODE === "UNSECURE") {
+    wss = new WebSocketServer({
+        port: process.env.PORT || 8080
+    });
+} else if (process.env.MODE === "SECURE") {
+    const {createServer} = require("https");
+    const {readFileSync} = require("fs");
+    server = createServer({
+        cert: readFileSync('/path/to/cert.pem'),
+        key: readFileSync('/path/to/key.pem')
+    });
+    wss = new WebSocketServer({server});
+}
 
 let room = new GameRoom();
 
@@ -25,3 +37,6 @@ wss.on("connection", (ws) => {
     room.registerNewPlayer(ws);
 });
 
+if (process.env.MODE === "SECURE") {
+    server.listen(process.env.PORT || 8080);
+}
