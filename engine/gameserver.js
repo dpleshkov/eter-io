@@ -13,8 +13,8 @@ if (process.env.MODE === "UNSECURE") {
     const {createServer} = require("https");
     const {readFileSync} = require("fs");
     server = createServer({
-        cert: readFileSync('/path/to/cert.pem'),
-        key: readFileSync('/path/to/key.pem')
+        cert: readFileSync(process.env.CERT),
+        key: readFileSync(process.env.KEY)
     });
     wss = new WebSocketServer({server});
 }
