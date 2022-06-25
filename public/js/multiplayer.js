@@ -79,7 +79,7 @@ socket.addEventListener("message", async(evt) => {
             players[id].hp = hp;
         } else if (view.getUint8(0) === 226) {
             let now = Date.now();
-            window.pingMeasurement = now - window.lastPing;
+            window.pingMeasurement = (now - window.lastPing) / 2;
 
             setTimeout(() => {
                 let msg = new ArrayBuffer(1);
