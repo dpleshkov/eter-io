@@ -114,10 +114,14 @@ class GameRoom {
                     }
                 } else if (view.getUint8(0) === 224) {
                     let direction = view.getUint16(1);
+                    let confirmationId = view.getUint8(3);
                     let angle = direction / 65536 * 2 * Math.PI;
                     let projectile = player.fire(angle, 30, 0.25);
                     if (projectile) {
-                        player.socket.send(GameRoom.serialize(projectile));
+                        player.socket.send(GameRoom.serialize(projectile, {
+                            confirmation: true,
+                            confirmationId: confirmationId
+                        }));
                         projectile.sentTo.add(player.entityId);
                     }
                 } else if (view.getUint8(0) === 225) {
@@ -144,7 +148,8 @@ class GameRoom {
             if (!player) continue;
             if (player.dead || player.destroyed) {
                 for (let entity of self.players) {
-                    if (entity !== player) {
+                    if (!entity) continue;
+                    if (entity !== player && entity.socket) {
                         entity.socket.send(JSON.stringify({
                             name: "player_gone",
                             data: {
@@ -174,7 +179,7 @@ class GameRoom {
         }
     }
 
-    static serialize(entity) {
+    static serialize(entity, options) {
         if (!entity) return;
         if (entity.constructor.name === "CircleObstacle") {
             let buffer = new ArrayBuffer(4);
@@ -204,7 +209,7 @@ class GameRoom {
 
             return buffer;
         } else if (entity.constructor.name === "ProjectileEntity") {
-            let buffer = new ArrayBuffer(18);
+            let buffer = new ArrayBuffer(options.confirmation ? 19 : 18);
             let view = new DataView(buffer);
 
             view.setUint8(0, 38);
@@ -213,6 +218,7 @@ class GameRoom {
             view.setFloat32(9, entity.velocity.x);
             view.setFloat32(13, entity.velocity.y);
             view.setUint8(17, entity.bounces);
+            if (options.confirmation) view.setUint8(18, options.confirmationId);
 
             return buffer;
         }

@@ -24,6 +24,18 @@ let player = new PlayerEntity(new Vector2(128, 128), new Vector2(), game);
 player.disableDeathCheck = true;
 camera.tracking = player;
 
+let projectileConfirmations = [];
+
+let confirmProjectile = function(projectile) {
+    for (let x=0; x<256; x++) {
+        if (typeof projectileConfirmations[x] === "undefined") {
+            projectileConfirmations[x] = projectile;
+            return x;
+        }
+    }
+    return -1;
+}
+
 socket.addEventListener("message", async(evt) => {
     let data = evt.data;
     if (typeof data === "object") {
@@ -67,25 +79,40 @@ socket.addEventListener("message", async(evt) => {
             players[id].hp = hp;
         } else if (view.getUint8(0) === 226) {
             let now = Date.now();
-            pingMeasurement = now - lastPing;
+            window.pingMeasurement = now - window.lastPing;
 
             setTimeout(() => {
                 let msg = new ArrayBuffer(1);
                 let view = new DataView(msg);
                 view.setUint8(0, 225);
                 socket.send(msg);
-                lastPing = Date.now();
+                window.lastPing = Date.now();
             }, 250);
         } else if (view.getUint8(0) === 38) {
+            let isConfirmation = view.byteLength === 19;
+
             let x = view.getFloat32(1);
             let y = view.getFloat32(5);
             let vx = view.getFloat32(9);
             let vy = view.getFloat32(13);
             let bounces = view.getUint8(17);
-            let projectile = new ProjectileEntity(new Vector2(x, y), new Vector2(vx, vy), game, {
-                color: player.color
-            });
-            projectile.bounces = bounces;
+            if (!isConfirmation) {
+                let projectile = new ProjectileEntity(new Vector2(x, y), new Vector2(vx, vy), game, {
+                    color: player.color
+                });
+                projectile.bounces = bounces;
+            } else {
+                let confirmationId = view.getUint8(18);
+                let projectile = projectileConfirmations[confirmationId];
+                if (projectileConfirmations[confirmationId]) {
+                    projectile.position.x = x;
+                    projectile.position.y = y;
+                    projectile.velocity.x = vx;
+                    projectile.velocity.y = vy;
+                    projectile.bounces = bounces;
+                    projectileConfirmations[confirmationId] = undefined;
+                }
+            }
         }
     } else if (typeof data === "string" && data.startsWith("{")) {
         let json = JSON.parse(data);
@@ -186,15 +213,24 @@ document.addEventListener("click", (evt) => {
     let angle = Math.atan2(evt.clientY - cy, evt.clientX - cx);
 
     let angleInt = Math.round(angle / 2 / Math.PI * 65536) % 65536;
-    let msg = new ArrayBuffer(3);
+
+    let confirmationId = confirmProjectile({
+        position: new Vector2(),
+        bounces: 0,
+        velocity: new Vector2()
+    });
+
+    let msg = new ArrayBuffer(4);
     let view = new DataView(msg);
     view.setUint8(0, 224);
     view.setUint16(1, angleInt);
+    view.setUint8(3, confirmationId);
     socket.send(msg);
     setTimeout(() => {
-        player.fire(angle, 30, 0.25, pingMeasurement);
+        let projectile = player.fire(angle, 30, 0.25);
+        projectileConfirmations[confirmationId] = projectile;
     }, pingMeasurement);
 });
 
 window.pingMeasurement = 0;
-let lastPing = Date.now();
+window.lastPing = Date.now();
