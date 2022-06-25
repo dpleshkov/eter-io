@@ -100,10 +100,10 @@ class GameRoom {
 
                 if (view.getUint8(0) === 223) {
                     let movementByte = view.getUint8(1);
-                    let right = movementByte & 0b0001;
-                    let left = movementByte & 0b0010;
-                    let up = movementByte & 0b0100;
-                    let down = movementByte & 0b1000;
+                    let right = movementByte & 0b0001 ? 1 : 0;
+                    let left = movementByte & 0b0010 ? 1 : 0;
+                    let up = movementByte & 0b0100 ? 1 : 0;
+                    let down = movementByte & 0b1000 ? 1 : 0;
                     if (right - left || down - up) {
                         let dir = Math.atan2(down - up, right - left);
                         player.movementAcceleration.x = 30 * Math.cos(dir);
