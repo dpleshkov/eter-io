@@ -209,7 +209,11 @@ class GameRoom {
 
             return buffer;
         } else if (entity.constructor.name === "ProjectileEntity") {
-            let buffer = new ArrayBuffer(options.confirmation ? 19 : 18);
+            let byteLength = 18;
+            if (options && options.confirmation) {
+                byteLength = 19;
+            }
+            let buffer = new ArrayBuffer(byteLength);
             let view = new DataView(buffer);
 
             view.setUint8(0, 38);
@@ -218,7 +222,7 @@ class GameRoom {
             view.setFloat32(9, entity.velocity.x);
             view.setFloat32(13, entity.velocity.y);
             view.setUint8(17, entity.bounces);
-            if (options.confirmation) view.setUint8(18, options.confirmationId);
+            if (options && options.confirmation) view.setUint8(18, options.confirmationId);
 
             return buffer;
         }
