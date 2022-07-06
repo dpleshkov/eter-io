@@ -34,7 +34,35 @@ let tick = function() {
 tick();
 
 wss.on("connection", (ws) => {
-    room.registerNewPlayer(ws);
+    ws.onmessage = function(message) {
+        let data = message.data;
+        if (typeof data === "string" && data.startsWith("{")) {
+            let json = JSON.parse(data);
+            if (json.name === "join") {
+                ws.allowedIn = true;
+                ws.joinOpts = json.data;
+                ws.send(JSON.stringify({
+                    name: "welcome",
+                    data: {
+                        game_width: room.game.width,
+                        game_height: room.game.height,
+                        chunk_width: room.game.chunkSize
+                    }
+                }));
+            } else if (json.name === "enter" && ws.allowedIn) {
+                room.registerNewPlayer(ws, ws.joinOpts);
+            }
+        } else if (typeof data === "object") {
+            let buffer = GameRoom.toArrayBuffer(data);
+            let view = new DataView(buffer);
+
+            if (view.getUint8(0) === 225) {
+                let pong = new Uint8Array(1);
+                pong[0] = 226;
+                ws.send(pong);
+            }
+        }
+    }
 });
 
 if (process.env.MODE === "SECURE") {

@@ -30,6 +30,19 @@ class Util {
         max = Math.floor(max);
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
+
+    static choose(choices) {
+        let index = Math.floor(Math.random() * choices.length);
+        return choices[index];
+    }
+
+    static sum(array) {
+        let sum = 0;
+        for (let el of array) {
+            sum += el;
+        }
+        return sum;
+    }
 }
 
 if (typeof module !== "undefined") {

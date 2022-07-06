@@ -58,8 +58,12 @@ class GameRoom {
         }
     }
 
-    registerNewPlayer(socket) {
+    registerNewPlayer(socket, options) {
         const self = this;
+
+        options = options || {};
+        console.log(options);
+        options.player_name = options.player_name || "Player";
 
         let id = self.getNewPlayerID();
         if (id === -1) {
@@ -77,14 +81,17 @@ class GameRoom {
 
         let player = new PlayerEntity(position, new Vector2(), self.game, {
             id: id,
-            socket: socket
+            socket: socket,
+            name: options.player_name
         });
 
         self.players[id] = player;
+        console.log(self.players[id].name);
 
         socket.send(JSON.stringify({
-            "joined": {
-                "id": id
+            name: "entered",
+            data: {
+                id: id
             }
         }));
 
@@ -113,13 +120,15 @@ class GameRoom {
                         player.movementAcceleration.y = 0;
                     }
                 } else if (view.getUint8(0) === 224) {
+                    let needsConfirm = view.byteLength === 4;
+
                     let direction = view.getUint16(1);
-                    let confirmationId = view.getUint8(3);
+                    let confirmationId = needsConfirm ? view.getUint8(3) : 0;
                     let angle = direction / 65536 * 2 * Math.PI;
                     let projectile = player.fire(angle, 30, 0.25);
                     if (projectile) {
                         player.socket.send(GameRoom.serialize(projectile, {
-                            confirmation: true,
+                            confirmation: needsConfirm,
                             confirmationId: confirmationId
                         }));
                         projectile.sentTo.add(player.entityId);
@@ -128,6 +137,20 @@ class GameRoom {
                     let pong = new Uint8Array(1);
                     pong[0] = 226;
                     player.socket.send(pong);
+                }
+            } else if (typeof data === "string" && data.startsWith("{")) {
+                let json = JSON.parse(data);
+                if (json && json.name === "get_name") {
+                    json.data = json.data || {};
+                    if (self.players[json.data.id]) {
+                        socket.send(JSON.stringify({
+                            name: "player_name",
+                            data: {
+                                id: json.data.id,
+                                name: self.players[json.data.id].name
+                            }
+                        }));
+                    }
                 }
             }
         }
@@ -179,7 +202,7 @@ class GameRoom {
         }
     }
 
-    static serialize(entity, options) {
+    static serialize(entity, options = {}) {
         if (!entity) return;
         if (entity.constructor.name === "CircleObstacle") {
             let buffer = new ArrayBuffer(4);

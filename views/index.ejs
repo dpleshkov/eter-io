@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>game</title>
+    <%- include("./partials/bootstrap") %>
+    <title>Gamig</title>
     <link rel="stylesheet" href="/css/main.css">
     <script>
         window._ROOMADDRESS = "<%= wsPath %>";
@@ -9,16 +10,46 @@
     <script src="/js/classes/Vector2.js" type="text/javascript"></script>
 </head>
 <body>
-    <canvas id="canvas"></canvas>
-    <script src="/js/classes/Entity.js" type="text/javascript"></script>
-    <script src="/js/classes/Camera.js" type="text/javascript"></script>
-    <script src="/js/classes/Chunk.js" type="text/javascript"></script>
-    <script src="/js/classes/CircleObstacle.js" type="text/javascript"></script>
-    <script src="/js/classes/Game.js" type="text/javascript"></script>
-    <script src="/js/classes/PlayerEntity.js" type="text/javascript"></script>
-    <script src="/js/classes/ProjectileEntity.js" type="text/javascript"></script>
-    <script src="/js/classes/Util.js" type="text/javascript"></script>
-    <script src="/js/classes/Vector.js" type="text/javascript"></script>
-    <script src="/js/multiplayer.js" type="text/javascript"></script>
+<div class="modal" tabindex="-1" id="settingsModal">
+    <div class="modal-dialog d-flex flex-column min-vh-100 justify-content-center align-items-center">
+        <div class="modal-content">
+            <div class="modal-body text-white nunito-sans-bold" style="background-color: #121212">
+                <label for="lagCompensationMode" class="float-start pt-1">Lag Compensation Mode:</label>
+                <select id="lagCompensationMode" class="form-select-sm float-end">
+                    <option value="one way">One-way</option>
+                    <option value="round trip">Round-trip</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+<canvas id="canvas"></canvas>
+<script>
+    (() => {
+        let resizeCanvas = () => {
+            document.getElementById("canvas").setAttribute("width", String(window.innerWidth * 2));
+            document.getElementById("canvas").setAttribute("height", String(window.innerHeight * 2));
+            document.getElementById("canvas").style.width = (window.innerWidth) + "px";
+            document.getElementById("canvas").style.height = (window.innerHeight) + "px";
+        }
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
+    })();
+</script>
+<div class="container text-white menu-overlay" id="mainMenu">
+    <div class="d-flex flex-column min-vh-100 justify-content-center align-items-center main-menu">
+        <h1 class="nunito-sans-bold">Gamig</h1>
+        <p>A WIP physics game by @dankdmitron</p>
+        <div class="input-group w-25">
+            <button class="btn btn-outline-danger"><i class="bi bi-gear-fill" id="settingsButton"></i></button>
+            <label for="nameInput" class="d-none">Enter nickname</label>
+            <input id="nameInput" type="text" class="form-control name-input" placeholder="Enter nickname"
+                   autocomplete="off" spellcheck="false" maxlength="16">
+            <button class="btn btn-outline-danger" id="playButton"><i class="bi bi-arrow-right"></i></button>
+        </div>
+    </div>
+</div>
+<%- include("./partials/engineClasses") %>
+<script src="/js/mp.js"></script>
 </body>
 </html>

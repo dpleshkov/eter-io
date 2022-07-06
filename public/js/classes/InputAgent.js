@@ -1,0 +1,54 @@
+class InputAgent {
+    constructor(multiplayerAgent) {
+        const self = this;
+
+        self.multiplayerAgent = multiplayerAgent;
+
+        self.movement = {
+            up: 0,
+            down: 0,
+            left: 0,
+            right: 0
+        };
+
+        document.addEventListener("click", (evt) => {
+            let cx = window.innerWidth / 2;
+            let cy = window.innerHeight / 2;
+            let angle = Math.atan2(evt.clientY - cy, evt.clientX - cx);
+
+            self.multiplayerAgent.fire(angle);
+        });
+
+        document.addEventListener("keydown", (evt) => {
+            const self = this;
+
+            if (evt.code === "KeyW") {
+                self.movement.up = 1;
+            } else if (evt.code === "KeyS") {
+                self.movement.down = 1;
+            } else if (evt.code === "KeyA") {
+                self.movement.left = 1;
+            } else if (evt.code === "KeyD") {
+                self.movement.right = 1;
+            }
+
+            self.multiplayerAgent.move(self.movement);
+        });
+
+        document.addEventListener("keyup", (evt) => {
+            const self = this;
+
+            if (evt.code === "KeyW") {
+                self.movement.up = 0;
+            } else if (evt.code === "KeyS") {
+                self.movement.down = 0;
+            } else if (evt.code === "KeyA") {
+                self.movement.left = 0;
+            } else if (evt.code === "KeyD") {
+                self.movement.right = 0;
+            }
+
+            self.multiplayerAgent.move(self.movement);
+        });
+    }
+}

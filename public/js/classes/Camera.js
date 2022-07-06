@@ -114,9 +114,9 @@ class Camera {
         self.ctx.fillText(`MSPT: ${mspt}`, self.scale/2, self.scale);
         self.ctx.fillText(`Ping: ${window.pingMeasurement} ms`, self.scale/2, 2*self.scale);
 
-        requestAnimationFrame(() => {
+        /*requestAnimationFrame(() => {
             self.render();
-        });
+        });*/
     }
 
     drawLine(x1, y1, x2, y2, color="#ffffff", width = 1) {
