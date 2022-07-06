@@ -91,7 +91,11 @@ class MultiplayerAgent {
             if (self.players[json.data.id]) {
                 self.players[json.data.id].name = json.data.name;
             }
-
+        } else if (json.name === "player_gone") {
+            if (self.players[json.data.id]) {
+                self.players[json.data.id].destroy();
+                self.players[json.data.id] = undefined;
+            }
         }
     }
 
@@ -121,7 +125,8 @@ class MultiplayerAgent {
                 radius: r,
                 hp: hp,
                 id: id,
-                disableDeathCheck: true
+                disableDeathCheck: true,
+                name: -1
             });
         }
         self.players[id].moveTo(new Vector2(x, y));
