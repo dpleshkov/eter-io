@@ -11,13 +11,25 @@ class InputAgent {
             right: 0
         };
 
-        document.addEventListener("click", (evt) => {
+        self.mousePosition = {
+            x: 0,
+            y: 0
+        }
+
+        document.addEventListener("mousemove", (evt) => {
+            self.mousePosition.x = evt.pageX;
+            self.mousePosition.y = evt.pageY;
+        }, false);
+
+        let fireEvent = (evt) => {
             let cx = window.innerWidth / 2;
             let cy = window.innerHeight / 2;
-            let angle = Math.atan2(evt.clientY - cy, evt.clientX - cx);
+            let angle = Math.atan2(self.mousePosition.y - cy, self.mousePosition.x - cx);
 
             self.multiplayerAgent.fire(angle);
-        });
+        }
+
+        document.addEventListener("click", fireEvent);
 
         document.addEventListener("keydown", (evt) => {
             const self = this;
@@ -46,6 +58,9 @@ class InputAgent {
                 self.movement.left = 0;
             } else if (evt.code === "KeyD") {
                 self.movement.right = 0;
+            } else if (evt.code === "Space") {
+                fireEvent(evt);
+                return;
             }
 
             self.multiplayerAgent.move(self.movement);

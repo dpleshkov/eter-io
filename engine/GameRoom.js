@@ -13,12 +13,12 @@ class GameRoom {
     constructor() {
         const self = this;
 
-        self.game = new Game(256, 256, 64);
+        self.game = new Game(64, 64, 16);
         self.obstacles = [];
         self.players = [];
         self.projectiles = new Set();
-        for (let x = 0; x < 512; x++) {
-            self.obstacles.push(new CircleObstacle(new Vector2(Util.randInt(3, 253), Util.randInt(3, 253)), self.game, {
+        for (let x = 0; x < 32; x++) {
+            self.obstacles.push(new CircleObstacle(new Vector2(Util.randInt(3, 61), Util.randInt(3, 61)), self.game, {
                 radius: Util.randInt(1, 3),
                 color: "#ffffff"
             }));

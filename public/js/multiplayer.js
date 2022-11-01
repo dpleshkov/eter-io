@@ -182,6 +182,9 @@ document.addEventListener("keyup", (evt) => {
         movement.left = 0;
     } else if (evt.code === "KeyD") {
         movement.right = 0;
+    } else if (evt.code === "Space") {
+        shoot(evt);
+        return;
     }
     let msg = new ArrayBuffer(2);
     let view = new DataView(msg);
@@ -206,7 +209,7 @@ document.addEventListener("keyup", (evt) => {
     }, pingMeasurement);
 });
 
-document.addEventListener("click", (evt) => {
+let shoot = (evt) => {
     let cx = window.innerWidth / 2;
     let cy = window.innerHeight / 2;
 
@@ -230,7 +233,9 @@ document.addEventListener("click", (evt) => {
         let projectile = player.fire(angle, 30, 0.25);
         projectileConfirmations[confirmationId] = projectile;
     }, pingMeasurement);
-});
+}
+
+document.addEventListener("click", shoot);
 
 window.pingMeasurement = 0;
 window.lastPing = Date.now();
