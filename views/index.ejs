@@ -24,18 +24,6 @@
     </div>
 </div>
 <canvas id="canvas"></canvas>
-<script>
-    (() => {
-        let resizeCanvas = () => {
-            document.getElementById("canvas").setAttribute("width", String(window.innerWidth * 2));
-            document.getElementById("canvas").setAttribute("height", String(window.innerHeight * 2));
-            document.getElementById("canvas").style.width = (window.innerWidth) + "px";
-            document.getElementById("canvas").style.height = (window.innerHeight) + "px";
-        }
-        resizeCanvas();
-        window.addEventListener("resize", resizeCanvas);
-    })();
-</script>
 <div class="container text-white menu-overlay" id="mainMenu">
     <div class="d-flex flex-column min-vh-100 justify-content-center align-items-center main-menu">
         <h1 class="nunito-sans-bold">Gamig</h1>
@@ -50,6 +38,18 @@
     </div>
 </div>
 <%- include("./partials/engineClasses") %>
+<script>
+    (() => {
+        let resizeCanvas = () => {
+            document.getElementById("canvas").setAttribute("width", String(window.innerWidth * 2));
+            document.getElementById("canvas").setAttribute("height", String(window.innerHeight * 2));
+            document.getElementById("canvas").style.width = (window.innerWidth) + "px";
+            document.getElementById("canvas").style.height = (window.innerHeight) + "px";
+        }
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
+    })();
+</script>
 <script src="/js/mp.js"></script>
 </body>
 </html>
