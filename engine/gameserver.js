@@ -66,5 +66,9 @@ wss.on("connection", (ws) => {
 });
 
 if (process.env.MODE === "SECURE") {
-    server.listen(process.env.PORT || 8080);
+    server.listen(process.env.PORT || 8080).then(() => {
+        console.log(`Server listening on ${process.env.PORT}`);
+    });
+} else {
+    console.log(`Server listening on ${process.env.PORT}`);
 }
